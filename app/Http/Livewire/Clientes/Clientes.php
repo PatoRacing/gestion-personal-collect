@@ -10,6 +10,7 @@ use Livewire\WithFileUploads;
 use App\Imports\DeudoresImport;
 use App\Imports\TelefonoImport;
 use App\Models\Importacion;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
@@ -55,6 +56,12 @@ class Clientes extends Component
             $mensajes = session('mensajesImportacion');
             $this->mensajeUno = $mensajes[0] ?? '';
             $this->mensajeDos = $mensajes[1] ?? '';
+        }
+
+        if (session()->has('error_importacion')) {
+            $this->alertaError = true;
+            $this->mensajeError = session()->get('error_importacion');
+            session()->forget('error_importacion'); 
         }
     }
 
@@ -178,7 +185,7 @@ class Clientes extends Component
     {
         $this->validate([
             'archivoSubido' => 'required|file|mimes:xls,xlsx|max:10240'
-        ]);      
+        ]);
         $excel = $this->archivoSubido;
         // Condicion 1: los encabezados deben ser exactamente iguales
         $encabezadosEsperados = ['nombre', 'tipo_doc', 'nro_doc', 'cuil', 'domicilio', 'localidad', 'codigo_postal'];
@@ -186,82 +193,11 @@ class Clientes extends Component
         {
             $this->errorEncabezados = true;
             return; 
-        }    
-        try
-        {
-            //Condicion 2: el tipo máximo para importar es de 20 minutos
-            ini_set('max_execution_time', 1200);
-            DB::beginTransaction();
-            $inicioDeImportacion = time();
-            $importarDeudores = new DeudoresImport;
-            Excel::import($importarDeudores, $excel);
-            //Obtengo los resultados de la importacion
-            $deudoresImportados = $importarDeudores->procesarDeudoresImportados;
-            //Condicion 3: Si no hay nro_doc la instancia se omite
-            $deudoresOmitidos = $importarDeudores->deudoresSinDocumento; 
-            $nuevosDeudores = 0;
-            $deudoresActualizados = 0;
-            foreach($deudoresImportados as $deudorImportado)
-            {
-                //Condicion 4: el tiempo máximo para importar es de 20 minutos
-                if (!$this->validarTiempoDeImportacion($inicioDeImportacion))
-                {
-                    return; 
-                }
-                //Condición 5: solo se guarda un nuevo registro en caso de que el deudor no exista en BD
-                $deudorEnBD = Deudor::where('nro_doc', trim((string)$deudorImportado['nro_doc']))->first();
-                if(!$deudorEnBD)
-                {
-                    $nuevoDeudor = new Deudor([
-                        'nombre' => ucwords(strtolower(trim($deudorImportado['nombre']))),
-                        'tipo_doc' => strtoupper(trim($deudorImportado['tipo_doc'])),
-                        'nro_doc' => preg_replace('/\D/', '', $deudorImportado['nro_doc']),
-                        'cuil' => preg_replace('/\D/', '', $deudorImportado['cuil']),
-                        'domicilio' => ucwords(strtolower(trim($deudorImportado['domicilio']))),
-                        'localidad' => ucwords(strtolower(trim($deudorImportado['localidad']))),
-                        'codigo_postal' => trim($deudorImportado['codigo_postal']),
-                        'ult_modif' => auth()->id(), 
-                    ]);
-                    $nuevosDeudores++;
-                    $nuevoDeudor->save();
-                }
-                //Si el deudor ya existe se actualiza con la informacion de la importacion
-                else
-                {
-                    $deudorEnBD->nombre = ucwords(strtolower(trim($deudorImportado['nombre'])));
-                    $deudorEnBD->tipo_doc = strtoupper(trim($deudorImportado['tipo_doc']));
-                    $deudorEnBD->nro_doc = preg_replace('/\D/', '', $deudorImportado['nro_doc']);
-                    $deudorEnBD->cuil = preg_replace('/\D/', '', $deudorImportado['cuil']);
-                    $deudorEnBD->domicilio = ucwords(strtolower(trim($deudorImportado['domicilio'])));
-                    $deudorEnBD->localidad = ucwords(strtolower(trim($deudorImportado['localidad'])));
-                    $deudorEnBD->codigo_postal = trim($deudorImportado['codigo_postal']);
-                    $deudorEnBD->ult_modif = auth()->id();
-                    $deudorEnBD->update();
-                    $deudoresActualizados ++;
-                }
-            }
-            //Generamos la instancia con el detalle de la importacion
-            $nuevaImportacion = new Importacion([
-                'tipo' => 1,//importacion de deudores
-                'valor_uno' => $deudoresOmitidos,
-                'valor_dos' => $nuevosDeudores,
-                'valor_tres' => $deudoresActualizados,
-                'ult_modif' => auth()->id()
-            ]);
-            $nuevaImportacion->save();
-            DB::commit();
-            // Mensaje para deudores omitidos
-            $this->mensajeUno = 
-                'Importación realizada correctamente (ver resumen en perfil).';
-            $this->importacionExitosa();
         }
-        catch(\Exception $e)
-        {
-            DB::rollBack();
-            $this->alertaError = true;
-            $this->mensajeError = 'Ocurrió un error inesperado durante la importación: ' . $e->getMessage();
-            return;
-        }
+        $nombreArchivo = time() . '_' . $this->archivoSubido->getClientOriginalName();
+        // Guardar en storage/app/uploads con storeAs
+        $this->archivoSubido->storeAs('uploads', $nombreArchivo);
+        Artisan::call('importar:deudores', ['archivo' => $nombreArchivo]);
     }
 
     public function importarInformacion()
