@@ -10,8 +10,10 @@ use Livewire\WithFileUploads;
 use App\Imports\DeudoresImport;
 use App\Imports\TelefonoImport;
 use App\Models\Importacion;
+use App\Models\PJobCron;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
 
@@ -186,6 +188,14 @@ class Clientes extends Component
         $this->validate([
             'archivoSubido' => 'required|file|mimes:xls,xlsx|max:10240'
         ]);
+
+        $archivos = Storage::files('uploads');
+        if (count($archivos) > 0) {
+            $this->alertaError = true; 
+            $this->mensajeError = 'Hay una importación pendiente.';
+            return; 
+        }
+
         $excel = $this->archivoSubido;
         // Condicion 1: los encabezados deben ser exactamente iguales
         $encabezadosEsperados = ['nombre', 'tipo_doc', 'nro_doc', 'cuil', 'domicilio', 'localidad', 'codigo_postal'];
@@ -197,7 +207,16 @@ class Clientes extends Component
         $nombreArchivo = time() . '_' . $this->archivoSubido->getClientOriginalName();
         // Guardar en storage/app/uploads con storeAs
         $this->archivoSubido->storeAs('uploads', $nombreArchivo);
-        Artisan::call('importar:deudores', ['archivo' => $nombreArchivo]);
+        $nuevoCron = new PJobCron([
+            'tipo' => 'Deudores',
+            'archivo' => $nombreArchivo,
+            'estado' => 1,
+            'ult_modif' => auth()->id(),
+            'observaciones' => 'Importación pendiente.'
+        ]);
+        $nuevoCron->save();
+        $this->mensajeUno = 'Importación programada correctamente (ver detalle en perfil).';
+        $this->importacionExitosa();
     }
 
     public function importarInformacion()

@@ -13,7 +13,7 @@ use Livewire\Component;
 
 class Perfil extends Component
 {
-    public $situacion = 1;
+    public $situacion = 4;
     public $usuarioId;
     public $clienteId;
 

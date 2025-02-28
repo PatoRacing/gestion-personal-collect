@@ -8,6 +8,7 @@ use App\Models\Importacion;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -18,7 +19,7 @@ class ImportarDeudores extends Command
      *
      * @var string
      */
-    protected $signature = 'importar:deudores {archivo}';
+    protected $signature = 'importar:deudores {archivo} {--user=}';
 
     /**
      * The console command description.
@@ -32,10 +33,10 @@ class ImportarDeudores extends Command
      */
     public function handle()
     {
+        $usuarioId = $this->option('user');
+
         //Se inicia el proceso del comando artisan
         try {
-            //Duracion maxima: 1 hora
-            ini_set('max_execution_time', 3600);
             $archivo = storage_path('app/uploads/' . $this->argument('archivo'));
             DB::beginTransaction();
             //Se llama a la clase de maatwebsite
@@ -62,7 +63,7 @@ class ImportarDeudores extends Command
                         'domicilio' => ucwords(strtolower(trim($deudorImportado['domicilio']))),
                         'localidad' => ucwords(strtolower(trim($deudorImportado['localidad']))),
                         'codigo_postal' => trim($deudorImportado['codigo_postal']),
-                        'ult_modif' => 1, 
+                        'ult_modif' => $usuarioId 
                     ]);
                     $nuevosDeudores++;
                     $nuevoDeudor->save();
@@ -77,7 +78,7 @@ class ImportarDeudores extends Command
                     $deudorEnBD->domicilio = ucwords(strtolower(trim($deudorImportado['domicilio'])));
                     $deudorEnBD->localidad = ucwords(strtolower(trim($deudorImportado['localidad'])));
                     $deudorEnBD->codigo_postal = trim($deudorImportado['codigo_postal']);
-                    $deudorEnBD->ult_modif = 1;
+                    $deudorEnBD->ult_modif = $usuarioId;
                     $deudorEnBD->update();
                     $deudoresActualizados ++;
                 }
@@ -90,11 +91,11 @@ class ImportarDeudores extends Command
                 'ult_modif' => 1
             ]);
             $nuevaImportacion->save();
+            Log::info('Archivo importado correctamente');
+
             DB::commit();
-            dd('correcto');
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->put('error_importacion', 'Ocurrió un error: ' . $e->getMessage());
             return;
         }
     }
