@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Perfil;
 
 use App\Models\Importacion;
+use App\Models\PJobCron;
 use Livewire\Component;
 
 class Importaciones extends Component
@@ -25,6 +26,8 @@ class Importaciones extends Component
                                             ->orderBy('created_at', 'desc')
                                             ->take(10)
                                             ->get();
+
+        $importacionProgramada = PJobCron::where('estado', 1)->first();
 
         return view('livewire.perfil.importaciones',[
             'importacionesDeudores' => $importacionesDeudores,
