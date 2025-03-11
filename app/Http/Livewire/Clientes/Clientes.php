@@ -189,13 +189,6 @@ class Clientes extends Component
             'archivoSubido' => 'required|file|mimes:xls,xlsx|max:10240'
         ]);
 
-        $archivos = Storage::files('uploads');
-        if (count($archivos) > 0) {
-            $this->alertaError = true; 
-            $this->mensajeError = 'Hay una importación pendiente.';
-            return; 
-        }
-
         $excel = $this->archivoSubido;
         // Condicion 1: los encabezados deben ser exactamente iguales
         $encabezadosEsperados = ['nombre', 'tipo_doc', 'nro_doc', 'cuil', 'domicilio', 'localidad', 'codigo_postal'];
@@ -233,75 +226,19 @@ class Clientes extends Component
             $this->errorEncabezadosContacto = true;
             return; 
         }
-        try
-        {
-            //Condicion 3: el tipo máximo para importar es de 20 minutos
-            ini_set('max_execution_time', 1200);
-            DB::beginTransaction();
-            $inicioDeImportacion = time();
-            $importarInformacion = new TelefonoImport;
-            Excel::import($importarInformacion, $excel);
-            //Obtengo los resultados de la importacion
-            $registrosImportados = $importarInformacion->procesarRegistrosImportados;
-            //Condicion 4: Si no hay nro_doc la instancia se omite
-            $registrosOmitidos = $importarInformacion->registrosSinDocumento; 
-            $deudoresNoEncontrados = 0;
-            $nuevosCuils = 0;
-            $nuevosMails = 0;
-            $nuevosTelefonos = 0;
-            foreach($registrosImportados as $registroImportado)
-            {
-                //Validar el tiempo máximo para importar es de 20 minutos
-                if (!$this->validarTiempoDeImportacion($inicioDeImportacion))
-                {
-                    return; 
-                }
-                //Condicion 5: si existe un deudor para el doc y el mismo no tiene cuil Y si en la importación hay cuil
-                //Se actualiza el deudor con el cuil importado
-                $deudor = $this->obtenerDeudor($registroImportado, $nuevosCuils , $deudoresNoEncontrados);
-                if($deudor && $registroImportado['email'])
-                {
-                    //Condicion 6: si existe deudor para el doc y si en la importacion hay mail.. se crea nuevo registro
-                    //Condicion 7: si existe un mail para el deudor pero es distinto al importado.. se crea nuevo registro
-                    $mailDeudor = $registroImportado['email'];
-                    $this->procesarEmail($deudor, $mailDeudor, $nuevosMails);
-                }
-                //Condicion 8: si existe deudor para el doc y si en la importacion hay telefono.. se crea nuevo registro
-                    //Condicion 9: si existe un telefono para el deudor pero es distinto al importado.. se crea nuevo registro
-                $telefonos = [
-                    'telefono_uno' => $registroImportado['telefono_uno'],
-                    'telefono_dos' => $registroImportado['telefono_dos'],
-                    'telefono_tres' => $registroImportado['telefono_tres']
-                ];
-                foreach ($telefonos as $tipoTelefono => $numero)
-                {
-                    if ($deudor && $numero) {
-                        $this->procesarTelefono($deudor, $numero, $nuevosTelefonos);
-                    }
-                }
-            }
-            //Generamos la instancia con el detalle de la importacion
-            $nuevaImportacion = new Importacion([
-                'tipo' => 2,//importacion de informacion
-                'valor_uno' => $registrosOmitidos,
-                'valor_dos' => $deudoresNoEncontrados,
-                'valor_tres' => $nuevosCuils,
-                'valor_cuatro' => $nuevosMails,
-                'valor_cinco' => $nuevosTelefonos,
-                'ult_modif' => auth()->id()
-            ]);
-            $nuevaImportacion->save();
-            DB::commit();
-            $this->mensajeUno = 'Importación realizada correctamente (ver resumen en perfil).';
-            $this->importacionExitosa();
-        } 
-        catch(\Exception $e)
-        {
-            DB::rollBack();
-            $this->alertaError = true;
-            $this->mensajeError = 'Ocurrió un error inesperado durante la importación: ' . $e->getMessage();
-            return;
-        }
+        $nombreArchivo = time() . '_' . $this->archivoExcel->getClientOriginalName();
+        // Guardar en storage/app/uploads con storeAs
+        $this->archivoExcel->storeAs('uploads', $nombreArchivo);
+        $nuevoCron = new PJobCron([
+            'tipo' => 'Informacion',
+            'archivo' => $nombreArchivo,
+            'estado' => 1,
+            'ult_modif' => auth()->id(),
+            'observaciones' => 'Importación pendiente.'
+        ]);
+        $nuevoCron->save();
+        $this->mensajeUno = 'Importación programada correctamente (ver detalle en perfil).';
+        $this->importacionExitosa();
     }
 
     private function validarEncabezados($encabezadosEsperados, $excel)
@@ -335,71 +272,6 @@ class Clientes extends Component
             'mensajeTres' => $this->mensajeTres,
             'mensajeCuatro' => $this->mensajeCuatro,
         ]);
-    }
-
-    private function obtenerDeudor($registroImportado, &$nuevosCuils, &$deudoresNoEncontrados)
-    {
-        $documento = trim((string) $registroImportado['documento']);
-        $cuil = preg_replace('/[^0-9]/', '', trim($registroImportado['cuil']));
-        $deudor = Deudor::where('nro_doc', $documento)->first();
-        if (!$deudor)
-        {
-            $deudoresNoEncontrados++;
-            return null; 
-        }
-        if ($deudor && !$deudor->cuil && $cuil)
-        {
-            $deudor->cuil = $cuil;
-            $deudor->ult_modif = auth()->id();
-            $deudor->update();
-            $nuevosCuils++;
-        }
-        return $deudor;
-    }
-
-    private function procesarEmail ($deudor, $mailDeudor, &$nuevosMails)
-    {
-        //Busco al deudor y sus posibles mails
-        $deudorId = $deudor->id;
-        $emailsExistentes = Telefono::where('deudor_id', $deudorId)->pluck('email');
-        //Si en la importacion hay mail se crea uno nuevo
-        if ($emailsExistentes->isEmpty())
-        {
-            $this->crearTelefono($deudorId, 'Desconocido', 'Referencia', $mailDeudor, 'email');
-            $nuevosMails++;
-        }
-        //Si el deudor tenia mail pero en la importacion hay uno distinto mail se crea uno nuevo
-        elseif (!$emailsExistentes->contains($mailDeudor))
-        {
-            $this->crearTelefono($deudorId, 'Desconocido', 'Referencia', $mailDeudor, 'email');
-            $nuevosMails++;
-        };
-    }
-
-    private function procesarTelefono($deudor, $numero, &$nuevosTelefonos)
-    {
-        $deudorId = $deudor->id;
-        $telefonosExistentes = Telefono::where('deudor_id', $deudorId)->pluck('numero');
-        if ($telefonosExistentes->isEmpty()) {
-            $this->crearTelefono($deudorId, 'Desconocido', 'Referencia', $numero, 'numero');
-            $nuevosTelefonos++;
-        } elseif (!$telefonosExistentes->contains($numero)) {
-            $this->crearTelefono($deudorId, 'Desconocido', 'Referencia', $numero, 'numero');
-            $nuevosTelefonos++;
-        }
-    }
-
-    private function crearTelefono($deudorId, $tipo, $contacto, $valor, $campo)
-    {
-        $telefono = new Telefono([
-            'deudor_id' => $deudorId,
-            'tipo' => $tipo,
-            'contacto' => $contacto,
-            $campo => $valor, 
-            'estado' => 2,
-            'ult_modif' => auth()->id(),
-        ]);
-        $telefono->save();
     }
 
     public function render()

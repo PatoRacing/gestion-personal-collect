@@ -29,11 +29,15 @@ class EjecutarImportaciones extends Command
      */
     public function handle()
     {
-        $importaciones = PJobCron::where('estado', 1)->get();
+        $importaciones = PJobCron::where('estado', 1)
+                                ->orderBy('created_at', 'asc')
+                                ->get();
         foreach($importaciones as $importacion) {
             try {
                 $importacion->estado = 2; // Estado 2: Procesando
                 $importacion->save();
+
+                //Importacion de deudores
                 if ($importacion->tipo === 'Deudores') {
                     $resultado = Artisan::call('importar:deudores', [
                         'archivo' => $importacion->archivo,
@@ -42,14 +46,38 @@ class EjecutarImportaciones extends Command
                     if($resultado !== 0) {
                         $this->marcarComoError($importacion, 'No se pudo realizar la importación');
                     }
+
+                //Importacion de operaciones
                 } elseif($importacion->tipo === 'Operaciones') {
-                    dd('importacion de operaciones');
+                    $resultado = Artisan::call('importar:operaciones', [
+                        'archivo' => $importacion->archivo,
+                        '--user' => $importacion->ult_modif,
+                        '--cliente' => $importacion->cliente_id
+                    ]);
+                    if($resultado !== 0) {
+                        $this->marcarComoError($importacion, 'No se pudo realizar la importación');
+                    }
+                //Importacion de informacion
                 } elseif($importacion->tipo === 'Informacion'){
-                    dd('importacion de informacion');
+                    $resultado = Artisan::call('importar:informacion', [
+                        'archivo' => $importacion->archivo,
+                        '--user' => $importacion->ult_modif
+                    ]);
+                    if($resultado !== 0) {
+                        $this->marcarComoError($importacion, 'No se pudo realizar la importación');
+                    }
+                
+                //Importacion de Asignacion
                 } elseif($importacion->tipo === 'Asignacion') {
-                    dd('importacion de asignacion');
+                    $resultado = Artisan::call('importar:asignacion', [
+                        'archivo' => $importacion->archivo,
+                        '--user' => $importacion->ult_modif,
+                        '--cliente' => $importacion->cliente_id
+                    ]);
+                    if($resultado !== 0) {
+                        $this->marcarComoError($importacion, 'No se pudo realizar la importación');
+                    }
                 }
-                Log::info('Resultado de la importación', ['codigo' => $resultado]);
                 $importacion->estado = 4; // Estado 4: Finalizado
                 $importacion->observaciones = 'Importación completada correctamente';
                 $importacion->save();

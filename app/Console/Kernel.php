@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('ejecutar:importaciones')
-        ->everyMinute()
+        ->dailyAt('22:00')
         ->onFailure(function () {
             Log::error('Falló la ejecución del CRON');
         })
