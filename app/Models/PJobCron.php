@@ -13,6 +13,7 @@ class PJobCron extends Model
 
     protected $fillable = [
         'tipo',
+        'cliente_id',
         'archivo',
         'estado',
         //1: Pendiente
@@ -22,6 +23,11 @@ class PJobCron extends Model
         'ult_modif',
         'observaciones'
     ];
+
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'cliente_id');
+    }
 
     public function usuario()
     {

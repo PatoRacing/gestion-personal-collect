@@ -1,24 +1,24 @@
 <div class="border p-1">
-    <div class="p-2 text-center text-sm gap-1 flex justify-center bg-gray-200">
+    <div class="p-2 text-center text-sm grid grid-cols-2 gap-1 md:flex md:justify-center bg-gray-200">
         <!-- Botones de navegación -->
         <button 
-            class="text-black p-2 rounded w-1/3 md:w-44 text-sm {{ $situacion === 1 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
+            class="text-black p-2 rounded md:w-44 text-sm {{ $situacion === 1 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
             wire:click="gestiones(1)">
             Tareas
         </button>
         <button 
-            class="text-black p-2 rounded w-1/3 md:w-44 text-sm {{ $situacion === 2 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
+            class="text-black p-2 rounded md:w-44 text-sm {{ $situacion === 2 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
             wire:click="gestiones(2)">
             Estadísticas
         </button>
         <button 
-            class="text-black p-2 rounded w-1/3 md:w-44 text-sm {{ $situacion === 3 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
+            class="text-black p-2 rounded md:w-44 text-sm {{ $situacion === 3 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
             wire:click="gestiones(3)">
             Mis datos
         </button>
         @if(auth()->user()->rol == 'Administrador')
             <button 
-                class="text-black p-2 rounded w-1/3 md:w-44 text-sm {{ $situacion === 4 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
+                class="text-black p-2 rounded md:w-44 text-sm {{ $situacion === 4 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
                 wire:click="gestiones(4)">
                 Importaciones
             </button>

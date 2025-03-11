@@ -91,8 +91,6 @@ class ImportarDeudores extends Command
                 'ult_modif' => 1
             ]);
             $nuevaImportacion->save();
-            Log::info('Archivo importado correctamente');
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
