@@ -37,16 +37,25 @@
             <!--Listado de operaciones-->
             <div class="mt-2 border p-1">
                 <h2 class="{{config('classes.subtituloUno')}}">Listado de operaciones</h2>
-                <x-cartera.operaciones-del-deudor :operaciones="$operaciones" :situacionDeudor="$situacionDeudor"/>
+                <x-cartera.operaciones-del-deudor
+                    :operaciones="$operaciones"
+                    :situacionDeudor="$situacionDeudor"
+                />
             </div>
         </div>
         <!--Listado de telefono-->
         <div class="mt-2 lg:mt-0 lg:col-span-1 border p-1">
             <h2 class="{{config('classes.subtituloUno')}}">Listado de teléfonos</h2>
-            <x-cartera.listado-de-telefonos :telefonos="$telefonos" :formularioNuevoTelefono="$formularioNuevoTelefono"
-                    :mensajeUno="$mensajeUno" :gestionTelefono="$gestionTelefono"
-                    :modalActualizarTelefono="$modalActualizarTelefono" :modalEliminarTelefono="$modalEliminarTelefono"
-                    :telefonoEliminado="$telefonoEliminado"/>
+            <x-cartera.listado-de-telefonos 
+                :telefonos="$telefonos" 
+                :origen="$origen"
+                :formularioNuevoTelefono="$formularioNuevoTelefono"
+                :mensajeUno="$mensajeUno"
+                :gestionTelefono="$gestionTelefono"
+                :modalActualizarTelefono="$modalActualizarTelefono"
+                :modalEliminarTelefono="$modalEliminarTelefono"
+                :telefonoEliminado="$telefonoEliminado"
+            />
         </div>
     </div>
 </div>

@@ -8,21 +8,21 @@
         <div class="p-1 border">
             <h2 class="{{config('classes.subtituloUno')}}">Detalle de la operación</h2>
             <div class="text-sm">
-                @php
-                $estado = [
-                    '5' => 'Ubicado',
-                    '6' => 'Negociación',
-                    '7' => 'Propuesta de Pago',
-                    '8' => 'Acuerdo de Pago',
-                    '9' => 'Finalizada',
-                    '10' => 'Inactiva'
-                ];
-                $estadoOperacion = $estado[$operacion->estado_operacion]
-            @endphp
-            <h3 class="{{config('classes.subtituloDos')}} mt-1 bg-green-700 text-white">
-                Estado: {{$estadoOperacion}}
-            </h3>
-            <x-gestiones.detalle-operacion :operacion="$operacion"/>
+                    @php
+                    $estado = [
+                        '5' => 'Ubicado',
+                        '6' => 'Negociación',
+                        '7' => 'Propuesta de Pago',
+                        '8' => 'Acuerdo de Pago',
+                        '9' => 'Finalizada',
+                        '10' => 'Inactiva'
+                    ];
+                    $estadoOperacion = $estado[$operacion->estado_operacion]
+                @endphp
+                <h3 class="{{config('classes.subtituloDos')}} mt-1 bg-green-700 text-white">
+                    Estado: {{$estadoOperacion}}
+                </h3>
+                <x-gestiones.detalle-operacion :operacion="$operacion"/>
             </div>
         </div>
         <!--Otras operaciones del deudor-->

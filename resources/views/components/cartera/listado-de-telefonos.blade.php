@@ -1,6 +1,6 @@
 @props([
     'telefonos', 'formularioNuevoTelefono', 'mensajeUno', 'gestionTelefono', 'modalActualizarTelefono',
-    'modalEliminarTelefono', 'telefonoEliminado'
+    'modalEliminarTelefono', 'telefonoEliminado', 'origen'
 ])
 <div class="max-h-[800px]  overflow-y-auto">
     <button class="bg-orange-500 hover:bg-orange-600 text-white rounded text-sm p-2 my-1"
@@ -61,6 +61,23 @@
                     </select>
                     <x-input-error :messages="$errors->get('contacto')" class="mt-2" />
                 </div>
+                <!-- Origen -->
+                <div class="mt-2">
+                    <x-input-label for="origen" :value="__('Origen:')" />
+                    <x-text-input
+                        id="origen"
+                        placeholder="Donde obtuviste el dato "
+                        class="block mt-1 w-full text-sm"
+                        type="text"
+                        wire:model="origen"
+                        :value="old('origen')"
+                        maxlength="30"
+                    />
+                    <div class="my-1 text-sm text-gray-500">
+                        Caracteres restantes: {{ 30 - strlen($origen) }}
+                    </div>
+                    <x-input-error :messages="$errors->get('origen')" class="mt-2" />
+                </div>
                 <!-- Número -->
                 <div class="mt-2">
                     <x-input-label for="numero_telefono" :value="__('Número:')" />
@@ -97,7 +114,10 @@
                         >
                             <option value="">Seleccionar</option>
                             <option value="1">Verificado</option>
-                            <option value="2">Sin verificar</option>
+                            <option value="2">A verificar</option>
+                            <option value="3">No corresponde</option>
+                            <option value="4">Inhabilitado</option>
+                            <option value="5">Inexistente</option>
                     </select>
                     <x-input-error :messages="$errors->get('estado_telefono')" class="mt-2" />
                 </div>
@@ -136,6 +156,15 @@
                             @endif
                         </span>
                     </p>
+                    <p>Origen:
+                        <span class="font-bold">
+                            @if(!$telefono->origen)
+                                Sin información
+                            @else
+                                {{$telefono->origen}}
+                            @endif
+                        </span>
+                    </p>
                     @if($telefono->email)
                         <p>Email:
                             <span class="font-bold">
@@ -154,9 +183,21 @@
                             <span class="font-bold uppercase text-green-700">
                                 Verificado
                             </span>
-                        @else
+                        @elseif($telefono->estado == 2)
                             <span class="font-bold uppercase text-red-600">
-                                Sin Verificar
+                                A Verificar
+                            </span>
+                        @elseif($telefono->estado == 3)
+                            <span class="font-bold uppercase text-red-600">
+                                No corresponde
+                            </span>
+                        @elseif($telefono->estado == 4)
+                            <span class="font-bold uppercase text-red-600">
+                                Inhabilitado
+                            </span>
+                        @elseif($telefono->estado == 5)
+                            <span class="font-bold uppercase text-red-600">
+                                Inexistente
                             </span>
                         @endif
                     </p>
@@ -234,6 +275,40 @@
                     </select>
                     <x-input-error :messages="$errors->get('contacto')" class="mt-2" />
                 </div>
+                <!-- estado -->
+                <div>
+                    <x-input-label for="estado_telefono" :value="__('Estado:')" />
+                    <select
+                            id="estado_telefono"
+                            class="block mt-1 w-full text-sm rounded-md border-gray-300"
+                            wire:model="estado_telefono"
+                        >
+                            <option value="">Seleccionar</option>
+                            <option value="1">Verificado</option>
+                            <option value="2">A verificar</option>
+                            <option value="3">No corresponde</option>
+                            <option value="4">Inhabilitado</option>
+                            <option value="5">Inexistente</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('estado_telefono')" class="mt-2" />
+                </div>
+                <!-- Origen -->
+                <div>
+                    <x-input-label for="origen" :value="__('Origen:')" />
+                    <x-text-input
+                        id="origen"
+                        placeholder="Donde obtuviste el dato "
+                        class="block mt-1 w-full text-sm"
+                        type="text"
+                        wire:model="origen"
+                        :value="old('origen')"
+                        maxlength="30"
+                    />
+                    <div class="my-1 text-sm text-gray-500">
+                        Caracteres restantes: {{ 30 - strlen($origen) }}
+                    </div>
+                    <x-input-error :messages="$errors->get('origen')" class="mt-2" />
+                </div>
                 <!-- Número -->
                 <div>
                     <x-input-label for="numero_telefono" :value="__('Número:')" />
@@ -259,20 +334,6 @@
                         :value="old('email')"
                         />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-                <!-- estado -->
-                <div>
-                    <x-input-label for="estado_telefono" :value="__('Estado:')" />
-                    <select
-                            id="estado_telefono"
-                            class="block mt-1 w-full text-sm rounded-md border-gray-300"
-                            wire:model="estado_telefono"
-                        >
-                            <option value="">Seleccionar</option>
-                            <option value="1">Verificado</option>
-                            <option value="2">Sin verificar</option>
-                    </select>
-                    <x-input-error :messages="$errors->get('estado_telefono')" class="mt-2" />
                 </div>
             </div>
             <!--Botonera-->

@@ -15,9 +15,15 @@ class Telefono extends Model
         'deudor_id',
         'tipo',
         'contacto',
+        'origen',
         'numero',
         'email',
-        'estado', // 1-Verificado 2-Sin verificar
+        'estado',
+        // 1-Verificado 
+        // 2-A verificar
+        // 3-No corresponde
+        // 4-Inhabilitado
+        // 5-Inexistente
         'ult_modif',
     ];
 

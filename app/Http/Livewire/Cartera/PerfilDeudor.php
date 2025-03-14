@@ -43,6 +43,7 @@ class PerfilDeudor extends Component
     //Variables de telefono
     public $tipo;
     public $contacto;
+    public $origen;
     public $numero;
     public $numero_telefono;
     public $email;
@@ -121,7 +122,7 @@ class PerfilDeudor extends Component
         if($contexto == 9)
         {
             $this->resetValidation();
-            $this->reset(['tipo', 'contacto', 'numero_telefono', 'email', 'estado_telefono']);
+            $this->reset(['tipo', 'contacto', 'origen', 'numero_telefono', 'email', 'estado_telefono']);
             $this->formularioNuevoTelefono = false;
         }
         //Modal Actualizar telefono
@@ -130,6 +131,7 @@ class PerfilDeudor extends Component
             $this->telefono  = Telefono::find($telefonoId);
             $this->tipo = $this->telefono->tipo ?? null;
             $this->contacto = $this->telefono->contacto ?? null;
+            $this->origen = $this->telefono->origen ?? null;
             $this->numero_telefono = $this->telefono->numero ?? null;
             $this->email = $this->telefono->email ?? null;
             $this->estado_telefono = $this->telefono->estado;
@@ -139,7 +141,7 @@ class PerfilDeudor extends Component
         if($contexto == 11)
         {
             $this->resetValidation();
-            $this->reset(['tipo', 'contacto', 'numero_telefono', 'email', 'estado_telefono']);
+            $this->reset(['tipo', 'contacto', 'origen', 'numero_telefono', 'email', 'estado_telefono']);
             $this->modalActualizarTelefono = false;
         }
         //Modal eliminar telefono
@@ -336,6 +338,7 @@ class PerfilDeudor extends Component
         $this->validate([
             'tipo' => 'required',
             'contacto' => 'required',
+            'origen' => 'required',
             'numero_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/|unique:d_telefonos,numero|required_without:email',
             'email' => 'nullable|email|max:255|unique:d_telefonos,email|required_without:numero_telefono',
             'estado_telefono' => 'required',
@@ -343,6 +346,8 @@ class PerfilDeudor extends Component
         $telefono = new Telefono([
             'deudor_id' => $this->deudor->id,
             'tipo' => $this->tipo,
+            'contacto' => $this->contacto,
+            'origen' => $this->origen,
             'numero' => $this->numero_telefono,
             'email' => $this->email,
             'estado' => $this->estado_telefono,
@@ -361,12 +366,14 @@ class PerfilDeudor extends Component
         $this->validate([
             'tipo' => 'required',
             'contacto' => 'required',
+            'origen' => 'required',
             'numero_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/|required_without:email',
             'email' => 'nullable|email|max:255|required_without:numero_telefono',
             'estado_telefono' => 'required',
         ]);
         $this->telefono->tipo = $this->tipo;
         $this->telefono->contacto = $this->contacto;
+        $this->telefono->origen = $this->origen;
         $this->telefono->numero = $this->numero_telefono;
         $this->telefono->email = $this->email;
         $this->telefono->estado = $this->estado_telefono;

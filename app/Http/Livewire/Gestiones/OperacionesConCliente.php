@@ -18,7 +18,9 @@ class OperacionesConCliente extends Component
                                 ->where('cliente_id', $clienteId)
                                 ->where('id', '!=', $operacionId)
                                 ->get();
-        $sumaDeOperaciones = $operacionesDelDeudor->sum('deuda_capital');
+        $sumaDeOperaciones = Operacion::where('deudor_id', $deudorId)
+                            ->where('cliente_id', $clienteId)
+                            ->sum('deuda_capital');
 
         return view('livewire.gestiones.operaciones-con-cliente',[
             'operacionesDelDeudor' => $operacionesDelDeudor,

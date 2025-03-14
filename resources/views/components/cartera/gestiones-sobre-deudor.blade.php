@@ -63,7 +63,10 @@
                         >
                         <option selected value="">-Seleccionar-</option>
                         <option value="1">Verificado</option>
-                        <option value="2">Sin verificar</option>
+                        <option value="2">A verificar</option>
+                        <option value="3">No corresponde</option>
+                        <option value="4">Inhabilitado</option>
+                        <option value="5">Inexistente</option>
                     </select>
                     <x-input-error :messages="$errors->get('estado')" class="mt-2" />
                 </div>

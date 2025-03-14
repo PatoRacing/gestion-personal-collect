@@ -52,8 +52,12 @@
         </p>
         <p>Responsable:
             <span class="font-bold">
-                {{ $operacion->usuarioAsignado->nombre }}
-                {{ $operacion->usuarioAsignado->apellido }}
+                @if($operacion->usuarioAsignado)
+                    {{ $operacion->usuarioAsignado->nombre }}
+                    {{ $operacion->usuarioAsignado->apellido }}
+                @else
+                    Sin asignar
+                @endif
             </span>
         </p>
         <p>Fecha Asig:
