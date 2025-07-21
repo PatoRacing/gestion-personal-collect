@@ -174,7 +174,7 @@ class NuevaGestion extends Component
         //Minimo a rendir al banco: al capital le aplico el maximo % de quita permitido
         $minimoARendir = $deudaCapital - ($deudaCapital * ($this->limiteQuita / 100));
         //Minimo a pagar por el deudor: Al minimo a rendir le agrego los honorarios
-        $this->minimoAPagar = $minimoARendir * (1 + ($this->operacion->producto->honorarios / 100));
+        $this->minimoAPagar = $minimoARendir * (1 + ($this->operacion->producto->honorarios / 100));        
         $this->minimoAPagar = ceil($minimoARendir / 100) * 100;
         
         if(auth()->user()->rol == 'Administrador')

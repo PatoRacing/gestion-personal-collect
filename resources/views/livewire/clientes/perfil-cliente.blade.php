@@ -153,7 +153,7 @@
                 @if($productos->count())
                     <div>
                         @foreach ($productos as $index => $producto)
-                            <div class=" text-sm p-1 border border-gray-700 md:my-1 {{ $index % 2 == 0 ? 'bg-blue-100' : 'bg-white' }}">
+                            <div class=" text-xs p-1 border border-gray-700 md:my-1 {{ $index % 2 == 0 ? 'bg-blue-100' : 'bg-white' }}">
                                 <h3 class="{{ config('classes.subtituloDos') }}
                                     {{ $producto->estado == 1 ? 'bg-blue-800' : 'bg-red-600' }}">
                                         {{$producto->nombre}}
@@ -192,14 +192,26 @@
                                     </span>
                                 </p>
                                 <!--botonera-->
-                                <div class="grid grid-cols-2 px-1 gap-1 mt-1">
-                                    <a href="{{ route('perfil.producto', ['id' => $producto->id]) }}" class="{{ config('classes.btn') }} text-center w-full block  bg-green-700 hover:bg-green-800">
-                                        Ver Perfil
-                                    </a>
-                                    <button class="{{ config('classes.btn') }} bg-blue-800 hover:bg-blue-900"
-                                            wire:click="gestiones(8, {{ $producto->id }})">
-                                        Actualizar
-                                    </button>
+                                <div class="grid grid-cols-2 gap-1 mt-1">
+                                    @if($producto->estado == 1)
+                                        <button class="py-1 text-white rounded bg-gray-500 hover:bg-gray-600"
+                                                wire:click="gestiones(11, {{ $producto->id }})">
+                                            Desactivar
+                                        </button>
+                                        <button class="py-1 text-white rounded bg-blue-800 hover:bg-blue-900"
+                                                wire:click="gestiones(8, {{ $producto->id }})">
+                                            Actualizar
+                                        </button>
+                                    @else
+                                        <button class="py-1 text-white rounded bg-green-700 hover:bg-green-800"
+                                                wire:click="gestiones(11, {{ $producto->id }})">
+                                            Activar
+                                        </button>
+                                        <button class="py-1 text-white rounded bg-red-600 hover:bg-red-700"
+                                                wire:click="gestiones(14, {{ $producto->id }})">
+                                            Eliminar
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -415,6 +427,65 @@
                 </div>
             </form>
         </x-modales.modal-formulario>
+    @endif
+    @if($modalProductoConOperaciones)
+        <x-modal-advertencia>
+            <div class="text-sm">
+                <p class="px-1 text-center">
+                    {{$this->mensajeUno}}
+                </p>
+                <p class="px-1 text-center">
+                    {{$this->mensajeDos}}
+                </p>
+            </div>
+            <div class="mt-1 w-full grid grid-cols-1">
+                <button class="{{ config('classes.btn') }} bg-red-600 hover:bg-red-700"
+                        wire:click.prevent="gestiones(12)">
+                    Cancelar
+                </button>
+            </div>
+        </x-modal-advertencia>
+    @endif
+    @if($modalProductoCambiarEstado)
+        <x-modal-advertencia>
+            <div class="text-sm">
+                <p class="px-1 text-center">
+                    {{$this->mensajeUno}}
+                </p>
+            </div>
+            <div class="mt-1 w-full grid grid-cols-2 gap-1">
+                <button class="{{ config('classes.btn') }} bg-green-700 hover:bg-green-800"
+                        wire:click.prevent="actualizarEstadoProducto">
+                    Confirmar
+                </button>
+                <button class="{{ config('classes.btn') }} bg-red-600 hover:bg-red-700"
+                        wire:click.prevent="gestiones(13)">
+                    Cancelar
+                </button>
+            </div>
+        </x-modal-advertencia>
+    @endif
+    @if($modalEliminarProducto)
+        <x-modal-advertencia>
+            <div class="text-sm">
+                <p class="px-1 text-center">
+                    {{$this->mensajeUno}}
+                </p>
+                <p class="px-1 text-center">
+                    {{$this->mensajeDos}}
+                </p>
+            </div>
+            <div class="mt-1 w-full grid grid-cols-2 gap-1">
+                <button class="{{ config('classes.btn') }} bg-green-700 hover:bg-green-800"
+                        wire:click.prevent="eliminarProducto">
+                    Confirmar
+                </button>
+                <button class="{{ config('classes.btn') }} bg-red-600 hover:bg-red-700"
+                        wire:click.prevent="gestiones(15)">
+                    Cancelar
+                </button>
+            </div>
+        </x-modal-advertencia>
     @endif
     <!--Modal Importando -->
     <div wire:loading wire:target="importarCartera, asignacionMasiva">

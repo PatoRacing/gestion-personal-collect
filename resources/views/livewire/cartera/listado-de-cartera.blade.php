@@ -36,14 +36,14 @@
     @php
         if(auth()->user()->rol == 'Administrador')
         {
-            $grid = 'lg:grid-cols-10';
+            $grid = 'lg:grid-cols-11';
         }
         else 
         {
-            $grid = 'lg:grid-cols-9';
+            $grid = 'lg:grid-cols-10';
         }
     @endphp
-    <div class="grid grid-cols-2 md:grid-cols-5 {{$grid}} p-3 my-2 bg-gray-200 gap-1 border">
+    <div class="grid grid-cols-2 md:grid-cols-4 {{$grid}} p-3 my-2 bg-gray-200 gap-1 border">
         <!-- Botones de navegación -->
         <button 
             class="text-black p-2 rounded w-38 text-sm {{ $estadoDeOperacion === 1 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
@@ -69,6 +69,11 @@
             class="text-black p-2 rounded w-38 text-sm {{ $estadoDeOperacion === 5 ? 'bg-green-700 text-white' : 'border shadow bg-white' }}" 
             wire:click="obtenerEstadoRequerido(5)">
             Ubicado
+        </button>
+        <button
+            class="text-black p-2 rounded w-38 text-sm {{ $estadoDeOperacion === 11 ? 'bg-gray-500 text-white' : 'border shadow bg-white' }}" 
+            wire:click="obtenerEstadoRequerido(11)">
+            Desconoce
         </button>
         <button
             class="text-black p-2 rounded w-38 text-sm {{ $estadoDeOperacion === 6 ? 'bg-orange-500 text-white' : 'border shadow bg-white' }}"  
@@ -115,96 +120,96 @@
     @endif
     <livewire:buscardor :contexto="3"/>
     @if($operaciones->count())
-    <div class="border text-sm container mx-auto grid grid-cols-1 justify-center md:grid-cols-2
-            lg:grid-cols-5 gap-2 p-1 max-h-[35rem] overflow-y-auto">
-        @foreach($operaciones as $operacion)
-            <div class="border border-gray-700 p-1">
-                @php
-                    $coloresEstado = [
-                        1 => 'bg-blue-800 hover:bg-blue-900 text-white',
-                        2 => 'bg-indigo-600 hover:bg-indigo-700 text-white',
-                        3 => 'bg-gray-900 hover:bg-black text-white',
-                        4 => 'bg-red-600 hover:bg-red-700 text-white',
-                        5 => 'bg-green-700 hover:bg-green-800 text-white',
-                        6 => 'bg-orange-500 hover:bg-orange-600 text-white',
-                        7 => 'bg-cyan-600 hover:bg-cyan-700 text-white',
-                        8 => 'bg-blue-400 hover:bg-blue-500 text-white',
-                        9 => 'bg-yellow-500 hover:bg-yellow-600 text-white',
-                        10 => 'bg-gray-500 hover:bg-gray-600 text-white',
-                    ];
-                    $claseColorA = $coloresEstado[$estadoDeOperacion] ?? 'bg-gray-300';
-                    $gestion = \App\Models\Gestion::where('operacion_id', $operacion->id)
-                                                ->whereIn('resultado', [4,7])
-                                                ->orderBy('created_at', 'desc')
-                                                ->first();
-                    if($gestion)
-                    {
-                        $acuerdo = \App\Models\Acuerdo::where('gestion_id', $gestion->id)
-                                    ->where('estado', '<', 6)
-                                    ->first();
-                    }
-                @endphp
-                @if($operacion->estado_operacion == 8 || $operacion->estado_operacion == 9)
-                    <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
-                        href="{{ route('acuerdo.perfil', ['id' => $acuerdo->id]) }}">
-                        {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
-                    </a>
-                @elseif($operacion->estado_operacion == 5 || $operacion->estado_operacion == 6
-                        || $operacion->estado_operacion == 7)
-                    <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
-                        href="{{ route('operacion.perfil', ['id' => $operacion->id]) }}">
-                        {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
-                    </a>
-                @else
-                    <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
-                        href="{{ route('deudor.perfil', ['id' => $operacion->deudor->id]) }}">
-                        {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
-                    </a>
-                @endif
-                <!--Subtitulo-->
-                @if(!$operacion->usuarioAsignado)
-                    <h4 class="{{config('classes.subtituloTres')}} bg-gray-600 text-white">
-                        Sin asignar
-                    </h4>
-                @else
-                    <h4 class="{{config('classes.subtituloTres')}} bg-green-700 text-white">
-                        Resp: {{$operacion->usuarioAsignado->nombre}} {{$operacion->usuarioAsignado->apellido}}
-                    </h4>
-                @endif
-                <div class="p-1">
-                    <p>DNI:
-                        <span class="font-bold">
-                            {{ number_format($operacion->deudor->nro_doc, 0, ',', '.') }}
-                        </span>
-                    </p>
-                    <p>CUIL:
-                        <span class="font-bold">
-                            @if($operacion->deudor->cuil)
-                                {{ $operacion->deudor->cuil }}
-                            @else
-                                - 
-                            @endif
-                        </span>
-                    </p>
-                    <p>Cliente:
-                        <span class="font-bold">{{$operacion->cliente->nombre}}</span>
-                    </p>
-                    <p>Producto:
-                        <span class="font-bold">{{$operacion->producto->nombre}}</span>
-                    </p>
-                    <p>Segmento:
-                        <span class="font-bold">{{ \Illuminate\Support\Str::limit($operacion->segmento, 8) }}</span>
-                    </p>
-                    <p>Operación:
-                        <span class="font-bold">{{$operacion->operacion}}</span>
-                    </p>
-                    <p>Deuda Capital:
-                        <span class="font-bold">${{number_format($operacion->deuda_capital, 2, ',', '.')}}</span>
-                    </p>
+        <div class="border text-sm container mx-auto grid grid-cols-1 justify-center md:grid-cols-2
+                lg:grid-cols-5 gap-2 p-1 max-h-[35rem] overflow-y-auto">
+            @foreach($operaciones as $operacion)
+                <div class="border border-gray-700 p-1">
+                    @php
+                        $coloresEstado = [
+                            1 => 'bg-blue-800 hover:bg-blue-900 text-white',
+                            2 => 'bg-indigo-600 hover:bg-indigo-700 text-white',
+                            3 => 'bg-gray-900 hover:bg-black text-white',
+                            4 => 'bg-red-600 hover:bg-red-700 text-white',
+                            5 => 'bg-green-700 hover:bg-green-800 text-white',
+                            6 => 'bg-orange-500 hover:bg-orange-600 text-white',
+                            7 => 'bg-cyan-600 hover:bg-cyan-700 text-white',
+                            8 => 'bg-blue-400 hover:bg-blue-500 text-white',
+                            9 => 'bg-yellow-500 hover:bg-yellow-600 text-white',
+                            10 => 'bg-gray-500 hover:bg-gray-600 text-white',
+                            11 => 'bg-gray-500 hover:bg-gray-600 text-white',
+                        ];
+                        $claseColorA = $coloresEstado[$estadoDeOperacion] ?? 'bg-gray-300';
+                        $gestion = \App\Models\Gestion::where('operacion_id', $operacion->id)
+                                                    ->whereIn('resultado', [4,7])
+                                                    ->orderBy('created_at', 'desc')
+                                                    ->first();
+                        if($gestion)
+                        {
+                            $acuerdo = \App\Models\Acuerdo::where('gestion_id', $gestion->id)
+                                        ->where('estado', '<', 6)
+                                        ->first();
+                        }
+                    @endphp
+                    @if($operacion->estado_operacion == 8 || $operacion->estado_operacion == 9)
+                        <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
+                            href="{{ route('acuerdo.perfil', ['id' => $acuerdo->id]) }}">
+                            {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
+                        </a>
+                    @elseif ($operacion->estado_operacion == 7)
+                        <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
+                            href="{{ route('operacion.perfil', ['id' => $operacion->id]) }}">
+                            {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
+                        </a>
+                    @else
+                        <a class="{{ config('classes.subtituloDos') }} {{ $claseColorA }} block w-full"
+                            href="{{ route('deudor.perfil', ['id' => $operacion->deudor->id]) }}">
+                            {{ $operacion->deudor->nombre ? \Illuminate\Support\Str::limit($operacion->deudor->nombre, 15) : 'Sin Datos' }}
+                        </a>
+                    @endif
+                    <!--Subtitulo-->
+                    @if(!$operacion->usuarioAsignado)
+                        <h4 class="{{config('classes.subtituloTres')}} bg-gray-600 text-white">
+                            Sin asignar
+                        </h4>
+                    @else
+                        <h4 class="{{config('classes.subtituloTres')}} bg-green-700 text-white">
+                            Resp: {{$operacion->usuarioAsignado->nombre}} {{$operacion->usuarioAsignado->apellido}}
+                        </h4>
+                    @endif
+                    <div class="p-1">
+                        <p>DNI:
+                            <span class="font-bold">
+                                {{ number_format($operacion->deudor->nro_doc, 0, ',', '.') }}
+                            </span>
+                        </p>
+                        <p>CUIL:
+                            <span class="font-bold">
+                                @if($operacion->deudor->cuil)
+                                    {{ $operacion->deudor->cuil }}
+                                @else
+                                    - 
+                                @endif
+                            </span>
+                        </p>
+                        <p>Cliente:
+                            <span class="font-bold">{{$operacion->cliente->nombre}}</span>
+                        </p>
+                        <p>Producto:
+                            <span class="font-bold">{{$operacion->producto->nombre}}</span>
+                        </p>
+                        <p>Segmento:
+                            <span class="font-bold">{{ \Illuminate\Support\Str::limit($operacion->segmento, 8) }}</span>
+                        </p>
+                        <p>Operación:
+                            <span class="font-bold">{{$operacion->operacion}}</span>
+                        </p>
+                        <p>Deuda Capital:
+                            <span class="font-bold">${{number_format($operacion->deuda_capital, 2, ',', '.')}}</span>
+                        </p>
+                    </div>
                 </div>
-            </div>
-        @endforeach
-    </div>  
+            @endforeach
+        </div>  
     @else
         <div class="col-span-full text-center">
             <p class="{{config('classes.variableSinResultados')}}">

@@ -23,7 +23,7 @@
     @endif
     <div class="container mx-auto border p-2 mt-2">
         <h2 class="{{config('classes.subtituloUno')}}">Listado de Usuarios</h2>
-        <div class="container text-sm mx-auto grid grid-cols-1 justify-center md:grid-cols-2 lg:grid-cols-5 gap-2 pt-1 px-1">
+        <div class="container text-sm mx-auto grid grid-cols-1 justify-center md:grid-cols-2 lg:grid-cols-4 gap-2 pt-1 px-1">
             @if($usuarios->count())
                 <!--Iteracion sobre los usuarios-->
                 @foreach ($usuarios as $usuario)
@@ -49,16 +49,16 @@
                                 <span class="font-bold">{{ number_format($usuario->dni, 0, ',', '.') }}</span>
                             </p>
                             <p>Email:
-                                <span class="font-bold">{{$usuario->email}}</span>
+                                <span class="font-bold">{{ Str::limit($usuario->email, 20) }}</span>
                             </p>
                             <p>Teléfono:
                                 <span class="font-bold">{{$usuario->telefono}}</span>
                             </p>
                             <p>Domicilio:
-                                <span class="font-bold">{{$usuario->domicilio}}</span>
+                                <span class="font-bold">{{ Str::limit($usuario->domicilio, 20) }}</span>
                             </p>
                             <p>Localidad:
-                                <span class="font-bold">{{$usuario->localidad}}</span>
+                                <span class="font-bold">{{ Str::limit($usuario->localidad, 20) }}</span>
                             </p>
                             <p>Cod. Postal:
                                 <span class="font-bold">{{$usuario->codigo_postal}}</span>

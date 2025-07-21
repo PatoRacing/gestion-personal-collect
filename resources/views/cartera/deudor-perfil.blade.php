@@ -10,7 +10,7 @@
         @else
             {{$deudor->nombre}}
         @endif
-        </h1>
+    </h1>
     <!--Contenedor principal-->
     <div class="{{ config('classes.contenedorPrincipal') }}">
         <livewire:cartera.perfil-deudor :deudor="$deudor">

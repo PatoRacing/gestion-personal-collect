@@ -2,7 +2,9 @@
 
 namespace App\Http\Livewire\Gestiones;
 
+use App\Models\GestionDeudor;
 use App\Models\Operacion;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
 class OperacionesConCliente extends Component
@@ -11,20 +13,16 @@ class OperacionesConCliente extends Component
 
     public function render()
     {
-        $deudorId = $this->operacion->deudor_id;
-        $clienteId = $this->operacion->cliente_id;
         $operacionId = $this->operacion->id;
-        $operacionesDelDeudor = Operacion::where('deudor_id', $deudorId)
-                                ->where('cliente_id', $clienteId)
-                                ->where('id', '!=', $operacionId)
-                                ->get();
-        $sumaDeOperaciones = Operacion::where('deudor_id', $deudorId)
-                            ->where('cliente_id', $clienteId)
-                            ->sum('deuda_capital');
+        $gestionesRealizadas = GestionDeudor::
+                            whereJsonContains('operaciones_incluidas_id', $operacionId)
+                            ->where('resultado', 'Ubicado')
+                            ->where('resultado_operacion', 'Negocia')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
 
-        return view('livewire.gestiones.operaciones-con-cliente',[
-            'operacionesDelDeudor' => $operacionesDelDeudor,
-            'sumaDeOperaciones' => $sumaDeOperaciones,
+        return view('livewire.gestiones.operaciones-con-cliente', [
+            'gestionesRealizadas' => $gestionesRealizadas
         ]);
     }
 }

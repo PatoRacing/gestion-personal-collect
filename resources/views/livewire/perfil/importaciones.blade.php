@@ -13,7 +13,7 @@
                         <p>{{$mensajeAlerta}}</p>
                     </div>
                 @endif
-                <div class="max-h-[45rem] md:max-h-[60rem] lg:max-h-[45rem]  overflow-y-auto shadow-lg">
+                <div class="max-h-[42rem] overflow-y-auto shadow-lg">
                     @if($importacionesEstado->count())
                         @foreach ($importacionesEstado as $importacionEstado)
                             <div class="px-2 pt-1 border border-gray-400 mt-1">
@@ -38,7 +38,7 @@
                                     </p>
                                     <p class="border-b-2 py-1">Archivo:
                                         <span class="font-bold">
-                                            {{$importacionEstado->archivo}}
+                                            {{ Str::limit($importacionEstado->archivo, 15) }}
                                         </span>
                                     </p>
                                     <p class="border-b-2 py-1">Usuario:
@@ -76,7 +76,7 @@
                     <!--Importaciones de deudor-->
                     <div class="p-1 border shadow-lg mt-1">
                         <h4 class="p-1 text-center text-sm bg-green-700 text-white">Deudores</h4>
-                        <div class="max-h-[25rem]  overflow-y-auto">
+                        <div class="max-h-[28rem] overflow-y-auto">
                             @if($importacionesDeudores->count())
                                 @foreach ($importacionesDeudores as $importacionDeudor)
                                     @php
@@ -124,7 +124,7 @@
                     <!--Importaciones de informacion-->
                     <div class="p-1 border shadow-lg mt-1">
                         <h4 class="p-1 text-center text-sm bg-green-700 text-white">Información</h4>
-                        <div class="max-h-[25rem]  overflow-y-auto">
+                        <div class="max-h-[28rem] overflow-y-auto">
                             @if($importacionesInformaciones->count())
                                 @foreach ($importacionesInformaciones as $importacionInformacion)
                                     @php
@@ -173,7 +173,7 @@
                     <!--Importaciones de operaciones-->
                     <div class="p-1 border shadow-lg mt-1">
                         <h4 class="p-1 text-center text-sm bg-green-700 text-white">Operaciones</h4>
-                        <div class="max-h-[25rem]  overflow-y-auto">
+                        <div class="max-h-[28rem] overflow-y-auto">
                             @if($importacionesOperaciones->count())
                                 @foreach ($importacionesOperaciones as $importacionOperacion)
                                     @php
@@ -228,7 +228,7 @@
                     <!--Importaciones de asignacion-->
                     <div class="p-1 border shadow-lg mt-1">
                         <h4 class="p-1 text-center text-sm bg-green-700 text-white">Asignaciones</h4>
-                        <div class="max-h-[25rem]  overflow-y-auto">
+                        <div class="max-h-[28rem] overflow-y-auto">
                             @if($importacionesAsignaciones->count())
                                 @foreach ($importacionesAsignaciones as $importacionAsignacion)
                                     @php

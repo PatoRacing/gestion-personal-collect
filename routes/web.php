@@ -43,7 +43,7 @@ Route::get('usuarios', [UsuarioController::class, 'index'])->middleware(['auth',
 //3-Clientes
 Route::get('clientes', [ClienteController::class, 'index'])->middleware(['auth', 'verified', 'rol.administrador'])->name('clientes');
 Route::get('perfil-cliente/{id}', [ClienteController::class, 'perfilCliente'])->middleware(['auth', 'verified', 'rol.administrador', 'validar.id'])->name('perfil.cliente');
-Route::get('perfil-producto/{id}', [ClienteController::class, 'perfilProducto'])->middleware(['auth', 'verified', 'rol.administrador', 'validar.id'])->name('perfil.producto');
+Route::get('perfil-producto/{id}', [ClienteController::class, 'perfilProducto'])->middleware(['auth', 'verified', 'solo.patricio', 'validar.id'])->name('perfil.producto');
 //4-Cartera
 Route::get('cartera', [CarteraController::class, 'index'])->middleware(['auth', 'verified'])->name('cartera');
 Route::get('deudor-perfil/{id}', [CarteraController::class, 'deudorPerfil'])->middleware(['auth', 'verified', 'validar.id'])->name('deudor.perfil');

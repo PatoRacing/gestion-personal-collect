@@ -2,32 +2,36 @@
     'deudor', 'modalInformacionDeudor', 'gestionDeudor', 'mensajeUno', 'gestionesDeudor', 'ultimaGestion'
 ])
 @php
+    $mapaEstados = [
+        1 => 'Sin gestión',
+        2 => 'En proceso',
+        3 => 'Fallecido',
+        4 => 'Inubicable',
+        5 => 'Ubicado',
+    ];
+
     $estados = [
+        'Sin gestión' => ['bgColor' => 'bg-blue-800', 'texto' => 'Sin gestión'],
         'En proceso' => ['bgColor' => 'bg-indigo-600', 'texto' => 'En proceso'],
         'Fallecido' => ['bgColor' => 'bg-gray-900', 'texto' => 'Fallecido'],
         'Inubicable' => ['bgColor' => 'bg-red-600', 'texto' => 'Inubicable'],
         'Ubicado' => ['bgColor' => 'bg-green-700', 'texto' => 'Ubicado'],
     ];
-    if (!$ultimaGestion)
-    {
-        $bgColor = 'bg-blue-800';
-        $texto = 'Sin Gestión';
-    }
-    else
-    {
-        $bgColor = $estados[$ultimaGestion->resultado]['bgColor'] ?? '';
-        $texto = $estados[$ultimaGestion->resultado]['texto'] ?? '';
-    }
+
+    $estadoNombre = $mapaEstados[$deudor->estado] ?? 'Desconocido';
+    $bgColor = $estados[$estadoNombre]['bgColor'] ?? '';
+    $texto = $estados[$estadoNombre]['texto'] ?? '';
 @endphp
+
 <!--Informacion del Cliente-->
 <div class="border border-gray-400 p-1 mt-1">
     <!--Alertas-->
     @if($gestionDeudor)
-    <div x-data="{ show: true }" 
-        x-init="setTimeout(() => show = false, 3000)" 
-        x-show="show" 
-        class="{{ config('classes.alertaExito') }} mb-1 text-green-800 bg-green-100 border-green-600">
-            <p>{{$mensajeUno}}</p>
+        <div x-data="{ show: true }" 
+            x-init="setTimeout(() => show = false, 3000)" 
+            x-show="show" 
+            class="{{ config('classes.alertaExito') }} mb-1 text-green-800 bg-green-100 border-green-600">
+                <p>{{$mensajeUno}}</p>
         </div>
     @endif
     <h3 class="{{config('classes.subtituloDos')}} {{$bgColor}} text-white uppercase">
@@ -40,7 +44,7 @@
             Sin datos
         @endif
     </h4>
-    <div class="grid mt-1 md:grid-cols-2 md:gap-2 lg:lg:grid-cols-1 lg:gap-0 p-1">
+    <div class="p-2">
         <p>Tipo Doc:
             @if($deudor->tipo_doc)
                 <span class="font-bold">
@@ -119,13 +123,10 @@
             </span>
         </p>
     </div>
-    <!--botonera-->
-    <div class="grid grid-cols-1">
-        <button class="{{ config('classes.btn') }} bg-blue-800 hover:bg-blue-900"
-                wire:click="mostrarModal(1)">
-            Actualizar
-        </button>
-    </div>
+    <button class="text-white py-1.5 rounded bg-blue-500 hover:bg-blue-600 w-full"
+            wire:click="mostrarModal(1)">
+        Actualizar
+    </button>
 </div>
 @if($modalInformacionDeudor)
     <x-modales.modal-formulario>

@@ -8,8 +8,8 @@
                 <p>{{ session('mensajeUno') }}</p>
             </div>
         @endif
-        <p class="text-center font-bold mt-2">
-            Aún hay gestiones realizadas.
+        <p class="text-center text-sm font-bold mt-2">
+            Aún hay propuestas realizadas.
         </p>
     @else
         @if(session('nuevaGestion'))

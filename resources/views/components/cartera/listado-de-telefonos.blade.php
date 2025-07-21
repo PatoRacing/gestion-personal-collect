@@ -2,7 +2,7 @@
     'telefonos', 'formularioNuevoTelefono', 'mensajeUno', 'gestionTelefono', 'modalActualizarTelefono',
     'modalEliminarTelefono', 'telefonoEliminado', 'origen'
 ])
-<div class="max-h-[800px]  overflow-y-auto">
+<div>
     <button class="bg-orange-500 hover:bg-orange-600 text-white rounded text-sm p-2 my-1"
             wire:click="mostrarModal(8)">
             + Telefóno 
@@ -135,9 +135,9 @@
         </div>
     @endif
     @if($telefonos->count())
-        <div class="grid md:grid-cols-2 md:gap-1 lg:grid-cols-1 text-sm lg:gap-0">
+        <div>
             @foreach ($telefonos as $index => $telefono)
-                <div class="p-2 border border-gray-400 my-1 md:my-0 lg:my-1 {{ $index % 2 == 0 ? 'bg-blue-100' : 'bg-white' }}">
+                <div class="p-2 border border-gray-400 mb-1 {{ $index % 2 == 0 ? 'bg-blue-100' : 'bg-white' }}">
                     <p>Tipo:
                         <span class="font-bold">
                             @if(!$telefono->tipo)

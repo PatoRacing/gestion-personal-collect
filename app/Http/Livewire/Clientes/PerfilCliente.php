@@ -36,6 +36,9 @@ class PerfilCliente extends Component
     public $modalNuevoProducto;
     public $modalActualizarProducto;
     public $modalEliminarCliente;
+    public $modalProductoConOperaciones;
+    public $modalProductoCambiarEstado;
+    public $modalEliminarProducto;
     //Mensajes
     public $mensajeUno;
     public $mensajeDos;
@@ -166,6 +169,98 @@ class PerfilCliente extends Component
             $this->reset(['archivoExcel']);
             $this->errorEncabezadosAsignacion = false;
         }
+        //Desactivar el producto
+        elseif($contexto == 11)
+        {
+            $operaciones =
+                Operacion::where('producto_id', $productoId)
+                        ->whereIn('estado_operacion', [1,2,3,4,5,6,7,8,11])
+                        ->exists();
+            if($operaciones)
+            {
+                $this->mensajeUno =
+                    'No se puede desactivar el producto.';
+                $this->mensajeDos =
+                    'Tiene operaciones activas sin finalizar.';
+                $this->modalProductoConOperaciones = true;
+            }
+            else
+            {
+                $this->producto = Producto::find($productoId);
+                if($this->producto->estado == 1)
+                {
+                    $this->mensajeUno =
+                        "El producto {$this->producto->nombre} será desactivado.";
+                }
+                else
+                {
+                    $this->mensajeUno =
+                        "El producto {$this->producto->nombre} será activado.";
+                }
+                $this->modalProductoCambiarEstado = true;
+            }
+        }
+        //Cerrar modal Producto con operaciones
+        elseif($contexto == 12)
+        {
+            $this->mensajeUno = '';
+            $this->mensajeDos = '';
+            $this->modalProductoConOperaciones = false;
+        }
+        //Cerrar modal Producto para cambiar estado
+        elseif($contexto == 13)
+        {
+            $this->mensajeUno = '';
+            $this->mensajeDos = '';
+            $this->modalProductoCambiarEstado = false;
+        }
+        //Modal eliminar producto
+        elseif($contexto == 14)
+        {
+            $this->mensajeUno =
+                'El producto será eliminado.';
+            $this->mensajeDos =
+                'No se puede revertir la accion.';
+            $this->modalEliminarProducto = true;
+        }
+        //Cerrar Modal eliminar producto
+        elseif($contexto == 15)
+        {
+            $this->mensajeUno = '';
+            $this->mensajeDos = '';
+            $this->modalEliminarProducto = false;
+        }
+    }
+
+    public function actualizarEstadoProducto()
+    {
+        if($this->producto->estado == 1)
+        {
+            $this->producto->estado = 2;
+        }
+        else
+        {
+            $this->producto->estado = 1;
+        }
+        $this->producto->ult_modif = auth()->id();
+        $this->producto->save();
+        $this->mensajeUno = '';
+        $this->mensajeDos = '';
+        $this->modalProductoCambiarEstado = false;
+        $this->mensajeAlerta = "Estado actualizado correctamente.";
+        $this->alertaGestionRealizada = true;
+        $this->render();
+    }
+
+    public function eliminarProducto()
+    {
+        $this->producto->delete();
+        $this->mensajeUno = '';
+        $this->mensajeDos = '';
+        $this->modalEliminarProducto = false;
+        $this->mensajeAlerta = "Producto eliminado correctamente.";
+        $this->alertaGestionRealizada = true;
+        $this->render();
     }
 
     public function actualizarEstado()
@@ -321,7 +416,10 @@ class PerfilCliente extends Component
 
     public function render()
     {
-        $productos = Producto::where('cliente_id', $this->cliente->id)->get();
+        $productos = 
+            Producto::where('cliente_id', $this->cliente->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
         $totalCasos = Operacion::where('cliente_id', $this->cliente->id)->get();
         $totalDNI = Operacion::where('cliente_id', $this->cliente->id)
                                 ->distinct('deudor_id')

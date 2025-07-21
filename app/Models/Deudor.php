@@ -19,6 +19,12 @@ class Deudor extends Model
         'domicilio',
         'localidad',
         'codigo_postal',
+        'estado',
+        //1- Sin gestion
+        //2- En Proceso
+        //3- Fallecido
+        //4- Inubicable
+        //5- Ubicado
         'ult_modif',
     ];
 

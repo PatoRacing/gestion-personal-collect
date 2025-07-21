@@ -1,8 +1,15 @@
 <div>
     <!--detalle, telefonos, operaciones, historial-->
-    <button class="{{ config('classes.btn') }} bg-blue-800 hover:bg-blue-900" onclick="window.location='{{ route('cartera') }}'">
-        Volver
-    </button>
+    <div class="flex gap-1">
+        <button class="{{ config('classes.btn') }} bg-blue-800 hover:bg-blue-900"
+                onclick="window.location='{{ route('cartera') }}'">
+            Cartera
+        </button>
+        <button class="{{ config('classes.btn') }} bg-orange-500 hover:bg-orange-600"
+                onclick="window.location='{{ route('deudor.perfil', ['id' => $operacion->deudor_id]) }}'">
+            Deudor
+        </button>
+    </div>
     <div id="encabezado" class="p-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:gap-1 mt-2">
         <!--detalle de operacion actual-->
         <div class="p-1 border">
@@ -15,7 +22,8 @@
                         '7' => 'Propuesta de Pago',
                         '8' => 'Acuerdo de Pago',
                         '9' => 'Finalizada',
-                        '10' => 'Inactiva'
+                        '10' => 'Inactiva',
+                        '11' => 'Desconoce'
                     ];
                     $estadoOperacion = $estado[$operacion->estado_operacion]
                 @endphp
@@ -25,19 +33,19 @@
                 <x-gestiones.detalle-operacion :operacion="$operacion"/>
             </div>
         </div>
-        <!--Otras operaciones del deudor-->
-        <div class="p-1 border">
-            <h2 class="{{config('classes.subtituloUno')}}">Operaciones con el cliente sin gestión</h2>
-            <livewire:gestiones.operaciones-con-cliente :operacion="$operacion"/>
-        </div>
         <!--Listado de telefonos-->
         <div class="p-1 border">
             <h2 class="{{config('classes.subtituloUno')}}">Listado de teléfonos</h2>
             <livewire:gestiones.listado-de-telefonos :operacion="$operacion"/>
         </div>
+        <!--Otras operaciones del deudor-->
+        <div class="p-1 border">
+            <h2 class="{{config('classes.subtituloUno')}}">Gestiones realizadas</h2>
+            <livewire:gestiones.operaciones-con-cliente :operacion="$operacion"/>
+        </div>
         <!--Historial de gestiones-->
         <div class="p-1 border">
-            <h2 class="{{ config('classes.subtituloUno') }}">Historial de gestiones</h2>
+            <h2 class="{{ config('classes.subtituloUno') }}">Historial de propuestas</h2>
             @if($nuevaGestion)
                 <div x-data="{ show: true }" 
                     x-init="setTimeout(() => show = false, 3000)" 
@@ -52,22 +60,21 @@
     <!--Nueva gestion-->
     <div class="border mt-1 p-1">
         <div class="p-1 border">
-            @php
-                if(auth()->user()->rol == 'Administrador')
-                {
-                    $usuario = 'Administrador';
-                }
-                else
-                {
-                    $usuario = 'Agente';
-                }
-            @endphp
-            <h2 class="{{config('classes.subtituloUno')}}">Nueva gestión de {{$usuario}}</h2>
-            <livewire:gestiones.nueva-gestion :operacion="$operacion" :telefonos="$telefonos" />
+            <h2 class="{{config('classes.subtituloUno')}}">Generar nueva propuesta</h2>
+            @if($operacion->estado_operacion !== 6)
+                <p class="text-center text-sm font-bold mt-2">
+                    No se crear una nueva propuesta porque la operación no está en estado de negociación.
+                </p>
+            @else
+                <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-1 text-sm">
+                    <livewire:gestiones.nueva-propuesta-cancelacion :operacion="$operacion" :telefonos="$telefonos" />
+                    <livewire:gestiones.nueva-propuesta-cuotas-fijas :operacion="$operacion" :telefonos="$telefonos" />
+                    <livewire:gestiones.nueva-propuesta-cuotas-variables :operacion="$operacion" :telefonos="$telefonos" />
+                </div>
+            @endif
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('livewire:load', function () {
         Livewire.on('gestionIngresada', () => {

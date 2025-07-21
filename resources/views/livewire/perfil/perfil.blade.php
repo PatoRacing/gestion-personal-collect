@@ -1,5 +1,13 @@
 <div class="border p-1">
-    <div class="p-2 text-center text-sm grid grid-cols-2 gap-1 lg:grid-cols-4 bg-gray-200">
+    @php
+        if(auth()->user()->rol == 'Administrador') {
+            $grid = 'grid grid-cols-2 md:grid-cols-4';
+        } else {
+            $grid = 'grid grid-cols-3';
+        }
+
+    @endphp
+    <div class="p-1.5 rounded text-center text-sm {{$grid}} gap-1 justify-center bg-blue-200">
         <!-- Botones de navegación -->
         <button 
             class="text-black p-2 rounded text-sm {{ $situacion === 1 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
@@ -14,7 +22,7 @@
         <button 
             class="text-black p-2 rounded text-sm {{ $situacion === 3 ? 'bg-blue-800 text-white' : 'border shadow bg-white' }}"
             wire:click="gestiones(3)">
-            Mis datos
+            G. Terceros
         </button>
         @if(auth()->user()->rol == 'Administrador')
             <button 
@@ -199,7 +207,7 @@
             </div>
         </div>
     @elseif($situacion == 3)
-        <livewire:perfil.datos />
+        <livewire:perfil.gestiones-terceros />
     @endif
     @if(auth()->user()->rol == 'Administrador')
         @if($situacion == 4)

@@ -54,6 +54,13 @@ class PerfilDeudor extends Component
     public $resultado_dos;
     public $observaciones_dos;
 
+    protected $listeners = ['nuevaGestionDeudor' => 'actualizarVista'];
+    
+    public function actualizarVista()
+    {
+        $this->render();
+    }
+
     public function mostrarModal($contexto, $gestionDeudorId = null, $telefonoId = null)
     {
         $this->nuevaGestion = false;
@@ -406,15 +413,15 @@ class PerfilDeudor extends Component
                                         ->get();
         if(auth()->user()->rol == 'Administrador')
         {
-            $operaciones = Operacion::where('deudor_id', $this->deudor->id)
-                                    ->where('estado_operacion', '!=', 10)
+            $operacionesHabilitadas = Operacion::where('deudor_id', $this->deudor->id)
+                                    ->whereIn('estado_operacion', [1, 2, 3, 4, 5, 6, 11])
                                     ->get();
         }
         else
         {
             $usuarioId = auth()->id();
-            $operaciones = Operacion::where('deudor_id', $this->deudor->id)
-                                    ->where('estado_operacion', '!=', 10)
+            $operacionesHabilitadas = Operacion::where('deudor_id', $this->deudor->id)
+                                    ->whereIn('estado_operacion', [1, 2, 3, 4, 5, 6, 11])
                                     ->where('usuario_asignado', $usuarioId)
                                     ->get();
         }
@@ -423,7 +430,7 @@ class PerfilDeudor extends Component
             'gestionesDeudor' => $gestionesDeudor,
             'ultimaGestion' => $this->obtenerUltimaGestionDeudor(),
             'telefonos' => $telefonos,
-            'operaciones' => $operaciones,
+            'operacionesHabilitadas' => $operacionesHabilitadas,
             'situacionDeudor' => $situacionDeudor,
         ]);
     }

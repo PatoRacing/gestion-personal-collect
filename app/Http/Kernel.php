@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'rol.administrador' => \App\Http\Middleware\RolUsuario::class,
         'validar.id' => \App\Http\Middleware\ValidarIdExistente::class,
         'usuario.logueado' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'solo.patricio' => \App\Http\Middleware\SoloPatricio::class,
     ];
 }

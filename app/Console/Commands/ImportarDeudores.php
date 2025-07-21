@@ -63,6 +63,7 @@ class ImportarDeudores extends Command
                         'domicilio' => ucwords(strtolower(trim($deudorImportado['domicilio']))),
                         'localidad' => ucwords(strtolower(trim($deudorImportado['localidad']))),
                         'codigo_postal' => trim($deudorImportado['codigo_postal']),
+                        'estado'=> 1,//Sin gestión
                         'ult_modif' => $usuarioId 
                     ]);
                     $nuevosDeudores++;

@@ -19,16 +19,17 @@ class Operacion extends Model
         'segmento',
         'deuda_capital',
         'estado_operacion',
-        // 1-Activa - sin gestion
-        // 2- Activa - deudor en proceso
-        // 3- Activa - deudor en fallecido
-        // 4- Activa - deudor en inubicable
-        // 5- Activa - deudor en ubicado
-        // 6- Activa - en negociacion
-        // 7- Activa - con propuesta de pago
-        // 8- Activa - con acuerdo de pago
+        // 1- sin gestion
+        // 2- deudor en proceso
+        // 3- deudor en fallecido
+        // 4- deudor en inubicable
+        // 5- Pospone
+        // 6- en negociacion
+        // 7- con propuesta de pago
+        // 8- con acuerdo de pago
         // 9- Finalizada
-        // 10-Inactiva 
+        // 10- Inactiva 
+        // 11 -Desconoce 
         'fecha_apertura',
         'cant_cuotas',
         'sucursal',
